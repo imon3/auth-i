@@ -3,6 +3,28 @@ const bcryptjs = require('bcryptjs');
 
 const Users = require('../users/usersModel');
 
+// MIDDLEWARE
+function restricted(req, res, next) {
+    let { username, password } = req.headers;
+
+    if (username && password) {
+        Users.findUserBy({ username })
+            .first()
+            .then((user => {
+                if (user && bcryptjs.compareSync(password, user.password)) {
+                    next()
+                } else {
+                    res.status(401).json({ message: 'Invalid Credentials' })
+                }
+            }))
+            .catch(err => {
+                res.status(500).json(err)
+            })
+    } else {
+        res.status(400).json({ message: 'No credentials provided.' })
+    }
+}
+
 // REGISTER NEW USER
 router.post('/register', (req, res) => {
     let user = req.body;
@@ -39,6 +61,13 @@ router.post('/login', (req, res) => {
 })
 
 // GET ALL USERS
+router.get('/users', restricted, (req, res) => {
+    Users.find()
+        .then(users => {
+            res.json(users)
+        })
+        .catch(err => res.send(err))
+})
 
 module.exports = router;
 
