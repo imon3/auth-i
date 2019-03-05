@@ -105,5 +105,20 @@ router.get('/users', restricted, (req, res) => {
         .catch(err => res.send(err))
 })
 
+// LOG OUT USER
+router.get('/logout', (req, res) => {
+    if (req.session) {
+        req.session.destroy(err => {
+            if (err) {
+                res.send('You may logout at any time.');
+            } else {
+                res.send('later, thanks for coming!');
+            }
+        })
+    } else {
+        res.end()
+    }
+})
+
 module.exports = router;
 
