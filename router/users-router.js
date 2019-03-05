@@ -1,7 +1,23 @@
 const router = require('express').Router()
 const bcryptjs = require('bcryptjs');
+const session = require('express-session');
 
 const Users = require('../users/usersModel');
+
+// SESSION TO KEEP COOKIES
+const sessionSecret = 'this is a secret, keep it to yourself!'
+
+const sessionConfig = {
+    name: 'panther',
+    secret: sessionSecret,
+    cookie: {
+        maxAge: 1000 * 60 * 15,
+        secure: false
+    },
+    httpOnly: true,
+    resave: false,
+    saveUninitialized: false
+}
 
 // MIDDLEWARE
 function restricted(req, res, next) {
@@ -24,6 +40,8 @@ function restricted(req, res, next) {
         res.status(400).json({ message: 'No credentials provided.' })
     }
 }
+
+router.use(session(sessionConfig));
 
 // REGISTER NEW USER
 router.post('/register', (req, res) => {
